@@ -6,15 +6,21 @@ from datetime import datetime
 
 # --- 1. Googleスプレッドシート接続設定 ---
 def connect_to_sheet():
-    # 認証のスコープ（範囲）を設定
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    # JSONファイルを使って認証
-    creds = ServiceAccountCredentials.from_json_keyfile_name('secret_key.json', scope)
+    
+    # --- ここを修正 ---
+    # ローカル（自分のPC）で動かす時はファイル、公開時はSecretsから読み込む設定
+    if "gcp_service_account" in st.secrets:
+        # Secretsから辞書形式で取得
+        creds_dict = dict(st.secrets["gcp_service_account"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    else:
+        # 自分のPCで動かす用
+        creds = ServiceAccountCredentials.from_json_keyfile_name('secret_key.json', scope)
+    # ------------------
+    
     client = gspread.authorize(creds)
-    
-    # 【ここを書き換えてください！】スプレッドシートのURLを入力
     SHEET_URL = "https://docs.google.com/spreadsheets/d/1xW-vIAnghcRwLxm2PkejeCvLkn-d4LKB9-4CgCwooUg/edit?gid=0#gid=0"
-    
     return client.open_by_url(SHEET_URL).sheet1
 
 # --- 2. アプリの基本設定 ---
