@@ -29,6 +29,11 @@ st.title("手伝い記録管理システム")
 # 「st.write(" ")」で文章を追加可能
 
 # 家事メニューと単価の設定（起業家として、ここを調整して利益率を考えるイメージ）
+task_name = {
+    "ゆうたろう": "ゆうたろう",
+     "ひろき": "ひろき",
+}
+   
 task_menu = {
     "皿洗い": 100,
     "風呂掃除": 100,
@@ -41,7 +46,7 @@ task_menu = {
 with st.form("housework_form"):
     st.subheader("お手伝いを記録する")
     
-    user_name = st.text_input("名前")
+    user_name = st.selectbox("名前", list(task_name.keys()))
     selected_task = st.selectbox("やった家事", list(task_menu.keys()))
     
     submit_button = st.form_submit_button("記録を送信")
@@ -68,7 +73,7 @@ with st.form("housework_form"):
 
 # --- 4. データの可視化（コンサル的視点） ---
 st.divider()
-st.subheader("📊 報酬状況の見える化")
+st.subheader("報酬状況の見える化")
 
 if st.button("最新の状況を表示する"):
     try:
