@@ -2,3 +2,8 @@ streamlit
 gspread
 oauth2client
 pandas
+streamlit
+gspread
+oauth2client
+pandas
+pytz
