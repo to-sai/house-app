@@ -3,6 +3,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 from datetime import datetime
+import pytz
 
 # --- 1. Googleスプレッドシート接続設定 ---
 def connect_to_sheet():
@@ -58,7 +59,9 @@ with st.form("housework_form"):
                 sheet = connect_to_sheet()
                 
                 # データの準備
-                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                # 日本のタイムゾーンを指定して現在時刻を取得
+                tokyo_tz = pytz.timezone('Asia/Tokyo')
+                now = datetime.now(tokyo_tz).strftime("%Y-%m-%d %H:%M:%S")
                 price = task_menu[selected_task]
                 
                 # 新しい行を追加 [日付, 内容, 金額, 名前]
