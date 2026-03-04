@@ -24,7 +24,7 @@ def connect_to_sheet():
     return client.open_by_url(SHEET_URL).sheet1
 
 # --- 2. アプリの基本設定 ---
-st.set_page_config(page_title="手伝い記録", page_icon="💰")
+st.set_page_config(page_title="手伝い記録", page_icon="💹")
 st.title("手伝い記録管理システム")
 # 「st.write(" ")」で文章を追加可能
 
