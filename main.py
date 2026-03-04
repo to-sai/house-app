@@ -73,7 +73,7 @@ with st.form("housework_form"):
 
 # --- 4. データの可視化（コンサル的視点） ---
 st.divider()
-st.subheader("報酬状況の見える化")
+st.subheader("報酬状況")
 
 if st.button("最新の状況を表示する"):
     try:
