@@ -6,10 +6,10 @@ from datetime import datetime
 import pytz
 
 # --- 1. Googleスプレッドシート接続設定 ---
+@st.cache_resource  #キャッシュ化
 def connect_to_sheet():
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    
-    # --- ここを修正 ---
+
     # ローカル（自分のPC）で動かす時はファイル、公開時はSecretsから読み込む設定
     if "gcp_service_account" in st.secrets:
         # Secretsから辞書形式で取得
@@ -23,6 +23,12 @@ def connect_to_sheet():
     client = gspread.authorize(creds)
     SHEET_URL = "https://docs.google.com/spreadsheets/d/1xW-vIAnghcRwLxm2PkejeCvLkn-d4LKB9-4CgCwooUg/edit?gid=0#gid=0"
     return client.open_by_url(SHEET_URL).sheet1
+
+# --- 修正点2：データの読み込みを関数にしてキャッシュする ---
+@st.cache_data(ttl=60)  # 60秒間はデータを保存（キャッシュ）して高速化する
+def get_all_data():
+    sheet = connect_to_sheet()
+    return sheet.get_all_records()
 
 # --- 2. アプリの基本設定 ---
 st.set_page_config(page_title="手伝い記録", page_icon="💹")
@@ -66,7 +72,7 @@ with st.form("housework_form"):
                 
                 # 新しい行を追加 [日付, 内容, 金額, 名前]
                 new_row = [now, selected_task, price, user_name]
-                sheet.append_row(new_row)
+                sheet.append_row([now, selected_task, tasks[selected_task], user_name])
                 
                 st.success(f"記録完了！{user_name}さんに {price}円 加算されました。")
             except Exception as e:
@@ -78,13 +84,13 @@ with st.form("housework_form"):
 st.divider()
 st.subheader("報酬状況")
 
-if st.button("最新の状況を表示する"):
+# --- 修正後の表示部分 ---
+if st.button("最新の報酬状況を表示する"):
     try:
-        sheet = connect_to_sheet()
-        # 全データを取得してPandasの表（データフレーム）にする
-        data = sheet.get_all_records()
-        
+        # sheet.get_all_records() の代わりに、キャッシュ付きの関数を呼ぶ
+        data = get_all_data() 
         if data:
+            # (以下、これまでの集計処理と同じ)
             df = pd.DataFrame(data)
             
             # 1. ユーザーごとの合計金額を計算
