@@ -72,7 +72,7 @@ with st.form("housework_form"):
                 
                 # 新しい行を追加 [日付, 内容, 金額, 名前]
                 new_row = [now, selected_task, price, user_name]
-                sheet.append_row([now, selected_task, tasks[selected_task], user_name])
+                sheet.append_row([now, selected_task, task_menu[selected_task], user_name])
                 
                 st.success(f"記録完了！{user_name}さんに {price}円 加算されました。")
             except Exception as e:
