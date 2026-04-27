@@ -81,9 +81,56 @@ with st.form("housework_form"):
             st.warning("名前を入力してください。")
 
 # --- 4. データの可視化（コンサル的視点） ---
-st.divider()
-st.subheader("報酬状況")
+#st.divider()
+#st.subheader("報酬状況")
 
+#--- 4. 報酬の集計表示（月次レポート機能付き） ---
+
+st.divider()
+if st.button("最新の報酬状況を表示"):
+    try:
+        # キャッシュされた関数からデータを取得
+        data = get_all_data() 
+        if data:
+            df = pd.DataFrame(data)
+            
+            # 【重要】日付列を日付型に変換し、新しい「月」列を作る
+            # 日付列の名前が「日時」や「日付」など、シートの1行目と一致しているか確認してください
+            date_column = '日時' # ここをシートの1行目の名前に合わせる
+            df[date_column] = pd.to_datetime(df[date_column])
+            df['月'] = df[date_column].dt.strftime('%Y-%m')
+            
+            # --- セクションA：全体の累計合計 ---
+            st.write("### 💰 全期間の累計報酬")
+            summary = df.groupby('名前')['金額'].sum().reset_index()
+            cols = st.columns(len(summary))
+            for i, row in summary.iterrows():
+                cols[i].metric(label=row['名前'], value=f"{row['金額']} 円")
+            
+            # --- セクションB：月ごとの集計（ここが新規追加！） ---
+            st.write("### 📅 月ごとの報酬まとめ")
+            # ピボットテーブルという機能を使って、横軸に名前、縦軸に月を並べます
+            monthly_pivot = df.pivot_table(
+                index='月', 
+                columns='名前', 
+                values='金額', 
+                aggfunc='sum', 
+                fill_value=0
+            ).sort_index(ascending=False) # 最新の月を一番上に
+            
+            # 表として表示
+            st.dataframe(monthly_pivot, use_container_width=True)
+            
+            # 視覚的に分かりやすくグラフも追加（オプション）
+            st.bar_chart(monthly_pivot)
+
+            st.write("### 📝 直近5件の履歴")
+            st.table(df.tail(5))
+            
+        else:
+            st.info("まだデータがありません。")
+    except Exception as e:
+        st.error(f"分析エラーが発生しました: {e}")
 # --- 修正後の表示部分 ---
 if st.button("最新の報酬状況を表示する"):
     try:
